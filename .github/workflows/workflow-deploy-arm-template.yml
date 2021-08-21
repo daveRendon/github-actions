@@ -1,0 +1,35 @@
+# This is a workflow to deploy ARM templates with Actions
+name: deployARMTemplate
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events for the main branch
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+# This workflow contains a single job called "build-and-deploy"
+  build-and-deploy:
+    runs-on: ubuntu-latest
+# Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+# Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@master
+    - uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    # Deploy ARM template
+    - name: Run ARM deploy
+      uses: azure/arm-deploy@v1
+      with:
+        subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
+        resourceGroupName: ${{ secrets.AZURE_RG }}
+        template: ./azuredeploy.json
+        # parameters: your-parameters-values-here
+
+        # output appName variable from ARM template
+    - run: echo ${{ steps.deploy.outputs.hostingPlanName }}
+
+        
